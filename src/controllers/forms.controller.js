@@ -44,6 +44,14 @@ export async function getForms(req, res) {
   res.send(formularios)
 }
 
+export async function getFormById(req, res) {
+  const { id } = req.params
+  const [rows] = await pool.query('select * from formulario where id_formulario = ?', [id])
+  if (rows.length === 0) return res.status(404).send('El formulario no existe')
+  const [formulario] = await estructuredForms(rows)
+  res.send(formulario)
+}
+
 export async function createForm(req, res) {
   const { formulario, preguntas, opciones } = req.body
   const { id_usuario, titulo, descripcion, estado } = formulario
@@ -71,18 +79,21 @@ export async function createForm(req, res) {
 
 export async function updateForm(req, res) {
   const { id } = req.params
-  const { titulo, descripcion, pregunta, opcion } = req.body
+  const { titulo, descripcion, estado, pregunta, opcion } = req.body
   try {
     const [rowsFormulario] = await pool.query('select * from formulario where id_formulario = ?', [id])
     if (rowsFormulario.length === 0) {
       res.send('El formulario que está intentando actualizar no existe')
       return
     }
-    if (titulo) {
+    if (titulo !== undefined) {
       await pool.query('update formulario set titulo = ? where id_formulario = ?', [titulo, id])
     }
-    if (descripcion) {
+    if (descripcion !== undefined) {
       await pool.query('update formulario set descripcion = ? where id_formulario = ?', [descripcion, id])
+    }
+    if (estado !== undefined) {
+      await pool.query('update formulario set estado = ? where id_formulario = ?', [estado, id])
     }
     if (pregunta) {
       for (const p of pregunta) {
@@ -107,14 +118,14 @@ export async function updateForm(req, res) {
 }
 
 export async function deleteForm(req, res) {
-  const { id_formulario } = req.body;
+  const { id } = req.params;
 
     try {
-      if (!id_formulario) {
+      if (!id) {
         return res.status(400).send('Se requiere el ID del formulario');
       }
 
-      const [resultado] = await pool.query('DELETE FROM formulario WHERE id_formulario = ?', [id_formulario]);
+      const [resultado] = await pool.query('DELETE FROM formulario WHERE id_formulario = ?', [id]);
 
       if (resultado.affectedRows === 0) {
         return res.status(404).send('El formulario no existe');

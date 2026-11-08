@@ -1,10 +1,12 @@
 import express from 'express'
 import formsRouter from './routes/form.route.js'
 import appRoutes from './routes/app.route.js'
+import cors from 'cors'
 
 const app = express()
 
 app.use(express.json())
+app.use(cors({origin: 'http://localhost:3000'}))
 
 app.use(formsRouter)
 app.use(appRoutes)
