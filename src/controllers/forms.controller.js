@@ -48,6 +48,7 @@ export async function getFormById(req, res) {
   const { id } = req.params
   const [rows] = await pool.query('select * from formulario where id_formulario = ?', [id])
   if (rows.length === 0) return res.status(404).send('El formulario no existe')
+  // Como lo que compone un formulario está separado en varias tablas en la base de datos, hay que recuperar cada una de las preguntas junto con las opciones para poder estructurarlo
   const [formulario] = await estructuredForms(rows)
   res.send(formulario)
 }
@@ -96,6 +97,7 @@ export async function updateForm(req, res) {
       await pool.query('update formulario set estado = ? where id_formulario = ?', [estado, id])
     }
     if (pregunta) {
+      // Se necesita recorrer cada pregunta para poder extraer solo los campos necesarios
       for (const p of pregunta) {
         const preguntaFields = {
           texto: p?.texto,
@@ -126,7 +128,7 @@ export async function deleteForm(req, res) {
       }
 
       const [resultado] = await pool.query('DELETE FROM formulario WHERE id_formulario = ?', [id]);
-
+      // Si no hay ninguna fila afectada, significa que no se borró nada
       if (resultado.affectedRows === 0) {
         return res.status(404).send('El formulario no existe');
       }

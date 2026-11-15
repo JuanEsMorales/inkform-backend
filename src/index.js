@@ -11,6 +11,8 @@ app.use(cors({origin: 'http://localhost:3000'}))
 app.use(formsRouter)
 app.use(appRoutes)
 
+
+// TODO: poner el puerto en una variable de entorno según está en local o en producción
 app.listen(3100)
 
 console.log('Servidor escuchando en el puerto http://localhost:3100')
